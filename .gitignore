@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Logs & Tests
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+run-qa-tests.mjs
+assets/img/qa/
+
+# OS / Editor Files
+.DS_Store
+Thumbs.db
+*.tmp
+.vscode/
+.idea/
+
+# Local build / cache
+dist/
+build/
+.cache/
