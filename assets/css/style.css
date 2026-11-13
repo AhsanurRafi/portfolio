@@ -3035,7 +3035,6 @@ button {
   transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-header,
 main,
 footer {
   position: relative;
