@@ -16,15 +16,15 @@ class ParticleNetwork {
 
     // Responsive configuration
     this.config = {
-      maxDist: 115,          // Max distance to draw connection lines
-      mouseRadius: 120,      // Cursor influence radius
+      maxDist: (typeof window !== 'undefined' && window.innerWidth < 768) ? 95 : 115, // Max distance to draw connection lines
+      mouseRadius: (typeof window !== 'undefined' && window.innerWidth < 768) ? 100 : 120, // Cursor influence radius
       repelForce: 0.8,       // Gentle repulsion strength
       baseSpeed: 0.35,       // Particle drift speed
       minRadius: 1.0,
       maxRadius: 2.0,
-      particleAlphaMin: 0.12,
-      particleAlphaMax: 0.28,
-      lineAlphaBase: 0.16,
+      particleAlphaMin: 0.14,
+      particleAlphaMax: 0.32,
+      lineAlphaBase: 0.18,
     };
 
     this.accentRgb = '94, 234, 212'; // Fallback teal
@@ -34,6 +34,8 @@ class ParticleNetwork {
     this.handleResize = this.handleResize.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
+    this.handleTouchMove = this.handleTouchMove.bind(this);
+    this.handleTouchEnd = this.handleTouchEnd.bind(this);
     this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
   }
 
@@ -53,9 +55,12 @@ class ParticleNetwork {
     this.updateAccentColor();
     this.handleResize();
 
-    // Event listeners
+    // Event listeners (Desktop + Mobile touch support)
     window.addEventListener('resize', this.handleResize, { passive: true });
     window.addEventListener('mousemove', this.handleMouseMove, { passive: true });
+    window.addEventListener('touchmove', this.handleTouchMove, { passive: true });
+    window.addEventListener('touchstart', this.handleTouchMove, { passive: true });
+    window.addEventListener('touchend', this.handleTouchEnd, { passive: true });
     document.addEventListener('mouseleave', this.handleMouseLeave);
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
 
@@ -68,8 +73,9 @@ class ParticleNetwork {
 
   getTargetParticleCount() {
     const width = window.innerWidth;
-    if (width < 768) return 0;       // Off on mobile for performance & battery
-    if (width < 1024) return 32;     // Tablet
+    if (width < 480) return 22;       // Mobile smartphone (smooth 60fps & battery-friendly)
+    if (width < 768) return 30;       // Large mobile / phablet
+    if (width < 1024) return 42;      // Tablet
     return 68;                       // Desktop
   }
 
@@ -126,6 +132,20 @@ class ParticleNetwork {
     this.mouseY = -9999;
   }
 
+  handleTouchMove(e) {
+    if (e.touches && e.touches.length > 0) {
+      this.mouseX = e.touches[0].clientX;
+      this.mouseY = e.touches[0].clientY;
+      this.isHoveringWindow = true;
+    }
+  }
+
+  handleTouchEnd() {
+    this.isHoveringWindow = false;
+    this.mouseX = -9999;
+    this.mouseY = -9999;
+  }
+
   handleVisibilityChange() {
     if (document.hidden) {
       this.pause();
@@ -166,6 +186,9 @@ class ParticleNetwork {
     this.stop();
     window.removeEventListener('resize', this.handleResize);
     window.removeEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener('touchmove', this.handleTouchMove);
+    window.removeEventListener('touchstart', this.handleTouchMove);
+    window.removeEventListener('touchend', this.handleTouchEnd);
     document.removeEventListener('mouseleave', this.handleMouseLeave);
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
 
